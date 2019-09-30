@@ -73,37 +73,32 @@ module.exports = async (client, logger, message) => {
 	if (message.author.id === client.user.id) return; // Self-commands disabled.
 
 	// Add data to database
-	const dbURL = "mongodb://localhost:27017/";
 	const xiv = new XIVAPI({private_key: `${api_key}`, language: 'en'});
-	client.db.connect(dbURL, { useNewUrlParser: true }, (err, db) => {
-		if (err) throw err;
+	var dbo = (await client.db).db("prima_db");
 
-		var dbo = db.db("prima_db");
+	dbo.collection("xivcharacters").findOne({ id: message.author.id }, async (err, res) => {
+		if (!res || !message.member.nickname) return;
 
-		dbo.collection("xivcharacters").findOne({ id: message.author.id }, async (err, res) => {
-			if (!res || !message.member.nickname) return;
+		if (!res.name || !res.world) {
+			await dbo.collection("xivcharacters").insertOne({ id: message.author.id });
+			res.name = message.member.nickname.substr(message.member.nickname.indexOf(")") + 1);
+			res.world = message.member.nickname.substr(1, message.member.nickname.indexOf(")"));
+		}
 
-			if (!res.name || !res.world) {
-				await dbo.collection("xivcharacters").insertOne({ id: message.author.id });
-				res.name = message.member.nickname.substr(message.member.nickname.indexOf(")") + 1);
-				res.world = message.member.nickname.substr(1, message.member.nickname.indexOf(")"));
-			}
+		if (!res.lodestone || !res.avatar) {
+			logger.log("info", res.world + " " + res.name);
 
-			if (!res.lodestone || !res.avatar) {
-				logger.log("info", res.world + " " + res.name);
+			xiv.character.search(res.name, { server: res.world }).then(async (search) => {
+				const character = search.Results[0] // First result is probably the best result.
 
-				xiv.character.search(res.name, { server: res.world }).then(async (search) => {
-					const character = search.Results[0] // First result is probably the best result.
+				await dbo.collection("xivcharacters").updateOne({ id: message.author.id }, { $set: { world: character.Server, name: character.Name, lodestone: character.ID, avatar: character.Avatar } });
 
-					await dbo.collection("xivcharacters").updateOne({ id: message.author.id }, { $set: { world: character.Server, name: character.Name, lodestone: character.ID, avatar: character.Avatar } });
+				logger.log('info', `prima_db: Updated ${message.author.id}: ${character.ID}, ${character.Avatar}`);
 
-					logger.log('info', `prima_db: Updated ${message.author.id}: ${character.ID}, ${character.Avatar}`);
-
-				}).catch((error) => {
-					return logger.log('error', `${res.world} isn't a valid server.`);
-				});
-			}
-		});
+			}).catch((error) => {
+				return logger.log('error', `${res.world} isn't a valid server.`);
+			});
+		}
 	});
 
 	if (message.guild) {

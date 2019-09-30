@@ -7,10 +7,7 @@ module.exports = {
 	async execute(client, message, logger, args) {
         if (!message.member.roles.some(roles => mod_roles.includes(roles.name))) return;
 
-		const dbURL = `mongodb://localhost:27017/`;
-		let db = await client.db.connect(dbURL, { useNewUrlParser: true });
-		if (!db) return message.channel.send(`Failed to access database.`);
-		var dbo = db.db("prima_db");
+		var dbo = (await client.db).db("prima_db");
 
         await message.channel.send(commontags.stripIndents`
             Complete documents are those that contain a character name, World, Lodestone ID, and avatar.

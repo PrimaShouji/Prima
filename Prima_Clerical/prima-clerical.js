@@ -20,7 +20,7 @@ const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('
 const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js')); // Load event plugins
 const cronFiles = fs.readdirSync('./cronjobs').filter(file => file.endsWith('.js')); // Load cron plugins
 client.cooldowns = new Discord.Collection(); // Make a collection of commands on cooldown, currently empty
-client.db = MongoClient;
+client.db = MongoClient.connect(dbURL, { useNewUrlParser: true, useUnifiedTopology: true });
 //client.externalMessageCache = new FileOperationQueue(`bigCache.json`);
 
 if (!fs.existsSync(`temp`)){

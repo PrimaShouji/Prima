@@ -29,8 +29,6 @@ module.exports = {
 		var world = args[0].replace(/[^a-zA-Z]/g, "");
 		var name = (args[1] + " " + args[2]).replace("<", "").replace(">", ""); // Used for the initial query.
 
-		const dbURL = `mongodb://localhost:27017/`;
-
 		xiv.character.search(name, { server: world }).then(async (res, err) => {
 			const character = res.Results.find((result) => result.Name.toLowerCase() === name.toLowerCase());
 
@@ -77,43 +75,39 @@ module.exports = {
 				.setDescription(`Query matched!`)
 				.setThumbnail(character.Avatar);
 
-			client.db.connect(dbURL, { useNewUrlParser: true }, (err, db) => {
-				if (err) throw err;
+			var dbo = (await client.db).db("prima_db");
+			var documentData = { id: message.author.id, world: world, name: name, lodestone: character.ID, avatar: character.Avatar };
 
-				var dbo = db.db("prima_db");
-				var documentData = { id: message.author.id, world: world, name: name, lodestone: character.ID, avatar: character.Avatar };
+			dbo.collection("xivcharacters").findOne({ lodestone: character.ID }, (err, res) => {
+				if (res && res.id !== message.author.id) return message.reply(`someone else has already registered that character.`).then((m) => m.delete(5000));
 
-				dbo.collection("xivcharacters").findOne({ lodestone: character.ID }, (err, res) => {
-					if (res && res.id !== message.author.id) return message.reply(`someone else has already registered that character.`).then((m) => m.delete(5000));
+				if (res && message.member.roles.some(r => ["Cleared", "Arsenal Master"].includes(r.name))) return message.reply(`you have already verified your character.`).then((m) => m.delete(5000));
 
-					if (res && message.member.roles.some(r => ["Cleared", "Arsenal Master"].includes(r.name))) return message.reply(`you have already verified your character.`).then((m) => m.delete(5000));
+				dbo.collection("xivcharacters").findOne({ id: message.author.id }, (err, res) => { // Check if an entry exists.
+					if (res) {
+						dbo.collection("xivcharacters").updateOne({ id: message.author.id }, { $set: { world: world, name: name, lodestone: character.ID, avatar: character.Avatar } }, (err, res) => { // Update if existing.
+							if (err) throw err;
 
-					dbo.collection("xivcharacters").findOne({ id: message.author.id }, (err, res) => { // Check if an entry exists.
-						if (res) {
-							dbo.collection("xivcharacters").updateOne({ id: message.author.id }, { $set: { world: world, name: name, lodestone: character.ID, avatar: character.Avatar } }, (err, res) => { // Update if existing.
-								if (err) throw err;
+							logger.log('info', `prima_db: Updated ${message.author.id}: (${world}) ${name}`);
 
-								logger.log('info', `prima_db: Updated ${message.author.id}: (${world}) ${name}`);
-
-								db.close();
-							});
-						} else {
-							dbo.collection("xivcharacters").insertOne(documentData, (err, res) => { // Create if nonexistent.
-								if (err) throw err;
-
-								logger.log('info', `prima_db: Updated ${message.author.id}: (${world}) ${name}`);
-
-								db.close();
-							});
-						}
-
-						message.channel.send(output).then((msg) => msg.delete(10000));
-
-						message.member.setNickname(`(${world}) ${name}`).then((mem) => { // Update their nickname.
-							logger.log('info', `Changed ${message.author.tag}'s nickname to (${world}) ${name}.`);
-						}).catch((err) => {
-							logger.log('error', `${err}. Are they the server owner?`);
+							db.close();
 						});
+					} else {
+						dbo.collection("xivcharacters").insertOne(documentData, (err, res) => { // Create if nonexistent.
+							if (err) throw err;
+
+							logger.log('info', `prima_db: Updated ${message.author.id}: (${world}) ${name}`);
+
+							db.close();
+						});
+					}
+
+					message.channel.send(output).then((msg) => msg.delete(10000));
+
+					message.member.setNickname(`(${world}) ${name}`).then((mem) => { // Update their nickname.
+						logger.log('info', `Changed ${message.author.tag}'s nickname to (${world}) ${name}.`);
+					}).catch((err) => {
+						logger.log('error', `${err}. Are they the server owner?`);
 					});
 				});
 			});
