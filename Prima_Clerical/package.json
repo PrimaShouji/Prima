@@ -1,0 +1,27 @@
+{
+  "name": "prima-clerical",
+  "version": "0.0.1",
+  "description": "karashiiro/Prima-P's everything bot uwu",
+  "main": "prima-clerical.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "karashiiro",
+  "license": "ISC",
+  "dependencies": {
+    "@ffxiv-teamcraft/simulator": "^1.3.2",
+    "common-tags": "^1.8.0",
+    "cron": "^1.7.2",
+    "discord.js": "^11.5.1",
+    "gm": "^1.23.1",
+    "lockfile": "^1.0.4",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.26",
+    "mongodb": "^3.3.2",
+    "node-cleanup": "^2.1.2",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4",
+    "winston": "^3.2.1",
+    "xivapi-js": "^0.1.3"
+  }
+}
