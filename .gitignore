@@ -60,9 +60,13 @@ typings/
 # next.js build output
 .next
 
-# Others
+# Program instance files
 stats/
 temp/
 helpfiles/
+schedules/
 bigCache.json
+bigCache.lock
 config.json
+credentials.json
+token.json
