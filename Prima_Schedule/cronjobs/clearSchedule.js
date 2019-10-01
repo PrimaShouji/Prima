@@ -113,17 +113,10 @@ module.exports = {
 			dateRef.set("Sep", { id: 8, name: "September", days: 30 });
 			dateRef.set("Oct", { id: 9, name: "October", days: 31 });
 			dateRef.set("Nov", { id: 10, name: "November", days: 30 });
-			dateRef.set("Dec", { id: 11, name: "Descember", days: 31 });
+			dateRef.set("Dec", { id: 11, name: "December", days: 31 });
 
 			var nextTime = new Date();
-			var nextDayOfTheMonth = now.getDate();
-			logger.log('info', runCoords[1]);
-			logger.log('info', now.getDay());
-			if (col < now.getDay()) { // Next run is to the left.
-				nextDayOfTheMonth += (7 - now.getDay()) + col;
-			} else if (col > now.getDay()) { // Next run is to the right.
-				nextDayOfTheMonth += runCoords[1] - now.getDay();
-			}
+			var nextDayOfTheMonth = now.getDate() + 7;
 
 			var thisMonthStr = "Jan";
 			dateRef.forEach((value, key, map) => {
