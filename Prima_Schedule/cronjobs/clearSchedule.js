@@ -116,7 +116,7 @@ module.exports = {
 			dateRef.set("Dec", { id: 11, name: "December", days: 31 });
 
 			var nextTime = new Date();
-			var nextDayOfTheMonth = now.getDate() + 7;
+			var nextDayOfTheMonth = now.getDate() + 6;
 
 			var thisMonthStr = "Jan";
 			dateRef.forEach((value, key, map) => {
