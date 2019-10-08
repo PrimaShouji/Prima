@@ -65,8 +65,10 @@ stats/
 temp/
 helpfiles/
 schedules/
+queues/
 bigCache.json
 bigCache.lock
 config.json
 credentials.json
 token.json
+*.queue

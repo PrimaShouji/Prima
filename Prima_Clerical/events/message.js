@@ -9,6 +9,7 @@ const { prefix, mod_roles, api_key } = require('../config.json');
 
 module.exports = async (client, logger, message) => {
 	// Saving the message with a callback because I don't want to block the command loop with this
+	// note: This fires on messages in guild channels only, not DMs. DM commands are logged, however.
 	lockfile.lock(`bigCache.lock`, (err) => {
 		if (err) {
 			logger.log('error', err);

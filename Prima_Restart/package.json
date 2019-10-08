@@ -1,0 +1,28 @@
+{
+  "name": "prima-restart",
+  "version": "0.0.1",
+  "description": "karashiiro/Prima-P's everything bot uwu",
+  "main": "prima-restart.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "karashiiro",
+  "license": "ISC",
+  "dependencies": {
+    "common-tags": "^1.8.0",
+    "cron": "^1.7.0",
+    "discord.js": "^11.5.0",
+    "gm": "^1.23.1",
+    "googleapis": "^27.0.0",
+    "lodash": "^4.17.11",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.25",
+    "mongodb": "^3.2.6",
+    "node-cleanup": "^2.1.2",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4",
+    "twitter": "^1.7.1",
+    "winston": "^3.2.1",
+    "xivapi-js": "^0.1.2"
+  }
+}
