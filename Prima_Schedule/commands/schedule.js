@@ -48,6 +48,11 @@ module.exports = {
 			}
 
 			// Parsing arguments
+			args = args.filter((a) => a !== "");
+
+			type = args[0].toUpperCase(); // Run tag
+			day = args[1].toLowerCase(); // Day of the week
+			time = args[2].toUpperCase(); // Time in the day
 			description = ''; // Description is the rest of the arguments, we loop through them
 
 			simple = true;
@@ -69,12 +74,6 @@ module.exports = {
 			if (!simple) {
 				description = description.replace(/\\n/gi, '\n');
 			}
-
-			args = args.filter((a) => a !== "");
-
-			type = args[0].toUpperCase(); // Run tag
-			day = args[1].toLowerCase(); // Day of the week
-			time = args[2].toUpperCase(); // Time in the day
 
 			var leader = message.author.tag; // Leader is whoever used the command
 			var leaderReadable = message.member.nickname ? message.member.nickname : leader;
