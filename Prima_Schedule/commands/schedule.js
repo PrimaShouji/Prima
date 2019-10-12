@@ -12,25 +12,25 @@ module.exports = {
 	execute(client, message, logger, args) {
 		// Most of the Google Sheets API framework here is copied from the documentation examples :(
 		if (message.channel.name !== "scheduling" && message.channel.name !== "scheduling-discussion") return;
-		
+
 		var schedulePublishChannel = message.guild.channels.find((ch) => ch.name === "schedules");
 		var dir = fs.readdirSync(`./schedules`);
 		var fileName;
-		
+
 		while (fileName === undefined || dir.indexOf(fileName) !== -1) {
 			fileName = ''; // Random six-digits
 			for (var i = 0; i < 6; i++) {
 				fileName += Math.floor(Math.random() * 10);
 			}
 		}
-		
+
 		// If modifying these scopes, delete token.json.
 		const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 		// The file token.json stores the user's access and refresh tokens, and is
 		// created automatically when the authorization flow completes for the first
 		// time.
 		const TOKEN_PATH = './token.json';
-		
+
 		const runTypes = ['FR', 'EX', 'OP', 'OZ', 'RC'];
 		const runColors = [
 			[159/255, 197/255, 232/255], // I could map this but I don't feel like it...
@@ -39,20 +39,17 @@ module.exports = {
 			[249/255, 203/255, 156/255],
 			[234/255, 153/255, 153/255]
 		];
-		
+
 		// ez checks
 		fs.access(`./schedules/${fileName}`, fs.constants.F_OK, (err) => {
 			if (!err) {
 				message.channel.send(`Error "Black Cow" occured while accessing a local file <@128581209109430272>.`);
 				return; // If it exists then we don't do anything else, shouldn't exist due to the above loop though.
 			}
-			
+
 			// Parsing arguments
-			type = args[0].toUpperCase(); // Run tag
-			day = args[1].toLowerCase(); // Day of the week
-			time = args[2].toUpperCase(); // Time in the day
 			description = ''; // Description is the rest of the arguments, we loop through them
-			
+
 			simple = true;
 			for(var i = 3; i < args.length; i++) {
 				if (args[i].indexOf('\\n') !== -1) {
@@ -72,54 +69,60 @@ module.exports = {
 			if (!simple) {
 				description = description.replace(/\\n/gi, '\n');
 			}
-			
+
+			args = args.filter((a) => a !== "");
+
+			type = args[0].toUpperCase(); // Run tag
+			day = args[1].toLowerCase(); // Day of the week
+			time = args[2].toUpperCase(); // Time in the day
+
 			var leader = message.author.tag; // Leader is whoever used the command
 			var leaderReadable = message.member.nickname ? message.member.nickname : leader;
 			var leaderMention = `<@${message.author.id}>`; // Setting this aside for the announcement later
-			
+
 			var innerText = (' ' + description).slice(1); // force copy
-			
+
 			description = `(${type}) ${description} [${leader}]`; // Reformatting now that all data is organized
-			
+
 			if (innerText.length > 1600) innerText = innerText.substr(0, 1600); // Prevent embed-related crashes
-			
+
 			// Input processing
 			if (time === undefined || day === undefined || type === undefined) { // It should short-circuit on the time check, but maybe I'm just being absentminded again :(
 				message.reply(`please enter the command with the arguments <type>, <day>, and <time>, e.g. ${prefix}schedule oz sun 1:30PM`);
 				return;
 			}
-			
+
 			if (runTypes.indexOf(type) === -1) {
 				message.reply(`${type} is not a valid run identifier. Valid identifiers include ${runTypes.toString()}`);
 			}
-			
+
 			if (isNaN(parseInt(time[0])) // First char isn't a digit
 				|| time.indexOf(':') === -1 // Doesn't contain colon
 				|| (time.indexOf('A') === -1 && time.indexOf('P') === -1) // Doesn't contain meridiem
 				|| time.indexOf('M') === -1 // See above
 				|| time.length > 7) // Time has more chars than 12:00PM
 				return message.reply(`that's not a valid time! Days and times should be written as \`#:##am/pm\`, with no spaces or formatting.`);
-			
+
 			if (time == '0:00PM') {
 				message.reply(`uh... ${time} isn't a time.`);
 				return;
 			}
-			
+
 			if (parseInt(time.substr(0, time.indexOf(':'))) === 0) { // If the time is formatted "0:30 AM" or "00:00 AM" or something.
 				time = `12${time.substr(time.indexOf(':'))}`;
 			} else if (parseInt(time[0]) === 0) { // The chart doesn't have zeroes at the start of each entry, so if anyone put zeroes before their time this removes them.
 				time = time.slice(1);
 			}
-			
+
 			time = `${time.substr(0, time.indexOf('M') - 1)} ${time.substr(time.indexOf('M') - 1)}`; // The chart has the meridiem with a space before it so we just add the space back :v
-			
+
 			minutes = time.substr(time.indexOf(':'));
 			minutes = minutes.substr(0, minutes.indexOf(' ')); // I don't know why I have to do it this way but it doesn't work in one line
 			if (minutes != ':00') {
 				message.reply(`the spreadsheet only has listings every hour. Please use minutes :00.`);
 				return;
 			}
-			
+
 			if (day.indexOf('mo') !== -1 || day.indexOf('月') !== -1) day = 'Monday';
 			else if (day.indexOf('tue') !== -1 || day.indexOf('火') !== -1) day = 'Tuesday';
 			else if (day.indexOf('we') !== -1 || day.indexOf('水') !== -1) day = 'Wednesday';
@@ -131,16 +134,16 @@ module.exports = {
 				message.reply(`you may have misspelled the day. This command accepts the days of the week written out in full or standardly abbreviated in English or Japanese.`);
 				return;
 			}
-			
+
 			// GOOGLE SHEETS API STUFF BELOW
-			
+
 			// Load client secrets from a local file.
 			fs.readFile('./credentials.json', (err, content) => {
 				if (err) throw err;
 				// Authorize a client with credentials, then call the Google Sheets API to edit the document.
 				authorize(JSON.parse(content), doSchedule);
 			});
-			
+
 			// Auth stuff
 			/**
 			 * Create an OAuth2 client with the given credentials, and then execute the
@@ -160,7 +163,7 @@ module.exports = {
 					callback(oAuth2Client);
 				});
 			}
-			
+
 			/**
 			 * Get and store new token after prompting for user authorization, and then
 			 * execute the given callback with the authorized OAuth2 client.
@@ -191,10 +194,10 @@ module.exports = {
 					});
 				});
 			}
-			
+
 			function doSchedule(auth) {
 				const sheets = google.sheets({version: 'v4', auth});
-				
+
 				letters = ['B', 'C', 'D', 'E', 'F' ,'G', 'H'];
 				days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 				times = ['12:00 AM',
@@ -208,7 +211,7 @@ module.exports = {
 						 '8:00 AM',
 						 '9:00 AM',
 						 '10:00 AM',
-						 '11:00 AM', 
+						 '11:00 AM',
 						 '12:00 PM',
 						 '1:00 PM',
 						 '2:00 PM',
@@ -221,45 +224,45 @@ module.exports = {
 						 '9:00 PM',
 						 '10:00 PM',
 						 '11:00 PM'];
-				
+
 				col = letters[days.indexOf(day)];
 				row = times.indexOf(time) + 8;
 				cell = `${col}${row}`;
-				
+
 				// If the entry already has a run, return to sender
 				const runList = fs.readdirSync('./schedules');
 				var keepGoing = 0;
 				for (file of runList) {
 					var otherDay, otherTime;
-			
+
 					fs.readFile(`./schedules/${file}`, (err, data) => {
 						if (err) throw err;
-						
+
 						data = data.toString().split(',');
-						
+
 						otherDay = data[0];
 						otherTime = times.indexOf(data[1]);
-						
+
 						checkableTime = times.indexOf(time);
-						
+
 						logger.log('info', `${day}, ${otherDay} - ${checkableTime}, ${otherTime}`);
-						
+
 						if (day == otherDay && Math.abs(checkableTime - otherTime) < 3) {
 							message.reply(`there's already a run scheduled at or within 3 hours of this time. To help minimize competition for instances, please schedule your run for a different time.`);
 							return;
 						} else {
 							keepGoing++;
 						}
-						
+
 						next();
 					});
 				}
-				
+
 				next();
-				
+
 				function next() {
 					if (keepGoing !== runList.length) return;
-					
+
 					// Otherwise, schedule the run
 					fs.writeFile(`./schedules/${fileName}`, `${day},${time},${message.author.id},`, (err) => {
 						if (err) {
@@ -267,7 +270,7 @@ module.exports = {
 							throw err;
 						}
 					});
-					
+
 					logger.log('info', `Run scheduled as "${description}" on ${day} at ${time}`)
 					message.channel.send(commontags.stripIndents`
 						${leaderMention} has just scheduled a run on ${day} at ${time} (PDT)!
@@ -276,29 +279,29 @@ module.exports = {
 						.then(() => {
 							message.react('📳');
 						});
-					
+
 					let color = "#0080ff";
 					if (type === "FR") color = "#9fc5e8";
 					if (type === "OP") color = "#ffe599";
 					if (type === "OZ") color = "#f9cb9c";
 					if (type === "RC") color = "#ea9999";
 					if (type === "EX") color = "#cc66ff";
-					
+
 					const embeddable = new Discord.RichEmbed()
 						.setColor(color)
 						.setTitle(`${leaderReadable} has just scheduled a run on ${day} at ${time} (PDT)!`)
 						.setDescription(commontags.stripIndents`
 							React to the :vibration_mode: on their message to be notified 30 minutes before it begins!
-							
+
 							**${leaderMention}'s message: <${message.url}>**
-							
+
 							${innerText}
-							
+
 							**Schedule Overview: <https://docs.google.com/spreadsheets/d/${spreadsheet_id}/>**
 						`);
-					
+
 					schedulePublishChannel.send(embeddable);
-					
+
 					// I'm going to be omegalazy and make multiple API calls because I can't figure out how to use batchUpdate with an UpdateCellsRequest
 					var range = `Schedule!${cell}`;
 					var values = [[description]];
@@ -313,7 +316,7 @@ module.exports = {
 					}, (err, res) => {
 						if (err) return logger.log('error', `The API returned an error: ${err}`);
 					});
-					
+
 					range = `Backside!${cell}`;
 					values = [[message.url]];
 					resource = {
@@ -327,7 +330,7 @@ module.exports = {
 					}, (err, res) => {
 						if (err) return logger.log('error', `The API returned an error: ${err}`);
 					});
-					
+
 					range = `Backer Side!${cell}`;
 					values = [[message.member.nickname]];
 					resource = {
@@ -359,7 +362,7 @@ module.exports = {
 						green: runColors[runTypes.indexOf(type)][1],
 						blue: runColors[runTypes.indexOf(type)][2],
 					};
-					
+
 					requests = [{
 						repeatCell: {
 							range,
@@ -371,9 +374,9 @@ module.exports = {
 							fields: `userEnteredFormat(backgroundColor)`
 						}
 					}];
-					
+
 					const batchUpdateRequest = {requests};
-					
+
 					sheets.spreadsheets.batchUpdate({
 						spreadsheetId: `${spreadsheet_id}`,
 						resource: batchUpdateRequest,
