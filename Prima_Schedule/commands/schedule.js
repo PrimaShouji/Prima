@@ -40,6 +40,26 @@ module.exports = {
 			[234/255, 153/255, 153/255]
 		];
 
+		function getFeb() {
+			let year = (new Date()).getFullYear();
+
+			if (year % 100 === 0 && year % 400 !== 0) {
+				return 28;
+			}
+
+			if (year % 4 === 0) {
+				return 29;
+			}
+
+			return 28;
+		}
+		const months = ["Janurary", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+		const daysPerMonth = [31, getFeb(), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+		const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+		const _dateObj = new Date();
+		dayOfRun = [_dateObj.getMonth(), _dateObj.getDay(), _dateObj.getDate()];
+
 		// ez checks
 		fs.access(`./schedules/${fileName}`, fs.constants.F_OK, (err) => {
 			if (!err) {
@@ -133,6 +153,29 @@ module.exports = {
 				message.reply(`you may have misspelled the day. This command accepts the days of the week written out in full or standardly abbreviated in English or Japanese.`);
 				return;
 			}
+
+			// Formatted date
+			const dayOfWeekOfRun = daysOfWeek.indexOf(day);
+			if (dayOfWeekOfRun > dayOfRun[1]) {
+				const diff = dayOfWeekOfRun - dayOfRun[1] + 1;
+				dayOfRun[2] += diff;
+				if (dayOfRun[2] > daysPerMonth[months.indexOf(dayOfRun[0])]) {
+					dayOfRun[2] -= daysPerMonth[months.indexOf(dayOfRun[0])];
+					dayOfRun[0]++;
+				}
+			} else if (dayOfWeekOfRun < dayOfRun[1]) {
+				const diff = dayOfRun[1] - dayOfWeekOfRun + 1;
+				dayOfRun[2] += diff;
+				if (dayOfRun[2] > daysPerMonth[months.indexOf(dayOfRun[0])]) {
+					dayOfRun[2] -= daysPerMonth[months.indexOf(dayOfRun[0])];
+					dayOfRun[0]++;
+				}
+			}
+			if (dayOfRun[0] > 11) {
+				dayOfRun[0] -= 12;
+			}
+			dayOfRun[1] = dayOfWeekOfRun;
+			dayOfRun = [months[dayOfRun[0]], daysOfWeek[dayOfRun[1]], dayOfRun[2]];
 
 			// GOOGLE SHEETS API STUFF BELOW
 
@@ -288,7 +331,7 @@ module.exports = {
 
 					const embeddable = new Discord.RichEmbed()
 						.setColor(color)
-						.setTitle(`${leaderReadable} has just scheduled a run on ${day} at ${time} (PDT)!`)
+						.setTitle(`${leaderReadable} has just scheduled a run on ${day} at ${time} (PDT) [${dayOfRun[1]}, ${dayOfRun[0]} ${dayOfRun[2]}]!`)
 						.setDescription(commontags.stripIndents`
 							React to the :vibration_mode: on their message to be notified 30 minutes before it begins!
 
