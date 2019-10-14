@@ -1,0 +1,19 @@
+{
+  "name": "prima",
+  "version": "2.0.0",
+  "description": "karashiiro/Prima-P's everything bot uwu",
+  "main": "prima.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/karashiiro/Prima.git"
+  },
+  "author": "karashiiro",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/karashiiro/Prima/issues"
+  },
+  "homepage": "https://github.com/karashiiro/Prima#readme"
+}
