@@ -199,10 +199,10 @@ module.exports = {
 					client_id, client_secret, redirect_uris[0]);
 
 				// Check if we have previously stored a token.
-				fs.readFile(TOKEN_PATH, (err, token) => {
+				fs.readFile(TOKEN_PATH, async (err, token) => {
 					if (err) return getNewToken(oAuth2Client, callback);
 					oAuth2Client.setCredentials(JSON.parse(token));
-					callback(oAuth2Client);
+					await callback(oAuth2Client);
 				});
 			}
 
@@ -237,7 +237,7 @@ module.exports = {
 				});
 			}
 
-			function doSchedule(auth) {
+			async function doSchedule(auth) {
 				const sheets = google.sheets({version: 'v4', auth});
 
 				letters = ['B', 'C', 'D', 'E', 'F' ,'G', 'H'];
@@ -277,7 +277,7 @@ module.exports = {
 				for (file of runList) {
 					var otherDay, otherTime;
 
-					fs.readFile(`./schedules/${file}`, (err, data) => {
+					fs.readFile(`./schedules/${file}`, async (err, data) => {
 						if (err) throw err;
 
 						data = data.toString().split(',');
@@ -296,13 +296,13 @@ module.exports = {
 							keepGoing++;
 						}
 
-						next();
+						await next();
 					});
 				}
 
-				next();
+				await next();
 
-				function next() {
+				async function next() {
 					if (keepGoing !== runList.length) return;
 
 					// Otherwise, schedule the run
@@ -342,7 +342,7 @@ module.exports = {
 							**Schedule Overview: <https://docs.google.com/spreadsheets/d/${spreadsheet_id}/>**
 						`);
 
-					schedulePublishChannel.send(embeddable);
+					const messageID = (await schedulePublishChannel.send(embeddable)).id;
 
 					// I'm going to be omegalazy and make multiple API calls because I can't figure out how to use batchUpdate with an UpdateCellsRequest
 					var range = `Schedule!${cell}`;
@@ -375,6 +375,20 @@ module.exports = {
 
 					range = `Backer Side!${cell}`;
 					values = [[message.member.nickname]];
+					resource = {
+						values
+					};
+					sheets.spreadsheets.values.update({
+						spreadsheetId: `${spreadsheet_id}`,
+						range,
+						valueInputOption: `RAW`,
+						resource
+					}, (err, res) => {
+						if (err) return logger.log('error', `The API returned an error: ${err}`);
+					});
+
+					range = `Backerest Side!${cell}`;
+					values = [[messageID]];
 					resource = {
 						values
 					};
