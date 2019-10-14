@@ -374,7 +374,7 @@ module.exports = {
 					});
 
 					range = `Backer Side!${cell}`;
-					values = [[message.member.nickname]];
+					values = [[message.member.nickname || message.author.tag]];
 					resource = {
 						values
 					};
