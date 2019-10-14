@@ -1,5 +1,6 @@
 // Dependencies
 const Discord              = require("discord.js");
+const fs                   = require("fs");
 
 const RSSManager           = require("./lib/subsystem/RSSManager");
 
@@ -10,14 +11,18 @@ const { token } = ensureConfig("./config.json");
 
 // Bot client initialization
 const client = new Discord.Client();
+client.domains = ["clerical", "extra", "queue", "scheduler", "restart", "admin"];
 
 // Client events
-client.events = [];
-for (let i = 0; i < client.events.length; i++) {
-    const e = client.events[i];
-    const boundEvent = client.on(e.eventName, e.bind(null, client));
-    // Replaces raw function with event listener
-    client.events[i] = boundEvent;
+client.eventFiles = fs.readdirSync("./lib/events").filter((fileName) => fileName.endsWith(".js"));
+client.boundEvents = [];
+for (let i = 0; i < client.eventFiles.length; i++) {
+    const e = require("./lib/events/" + client.eventFiles[i]);
+    const boundEvent = client.on(
+        client.eventFiles[i].substr(0, client.eventFiles[i].indexOf(".")),
+        e.bind(null, client)
+    );
+    client.boundEvents[i] = boundEvent;
 }
 
 // Log in and set up subsystems
