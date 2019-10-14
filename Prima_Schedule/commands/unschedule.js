@@ -74,108 +74,6 @@ module.exports = {
 
 		if (!foundAny) return message.reply(`you don't seem to have a run scheduled at that day and time!`);
 
-		function deleteScheduleEmbed() {
-			const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
-			const TOKEN_PATH = './token.json';
-
-			fs.readFile('./credentials.json', (err, content) => {
-				if (err) throw err;
-				// Authorize a client with credentials, then call the Google Sheets API to edit the document.
-				authorize(JSON.parse(content), (auth) => {
-					const sheets = google.sheets({version: 'v4', auth});
-
-					sheets.spreadsheets.values.get({
-						spreadsheetId: spreadsheet_id,
-						range: `Backerest Side!B8:H31`,
-					}, (err, res) => {
-						if (err) return logger.log("error", 'The API returned an error: ' + err);
-
-						const rows = res.data.values;
-
-						if (rows.length) {
-							let runCoords; // [row, col]
-
-							let curX = now.getDay();
-							let curY = now.getHours() + 1; // Add 1 to round up regardless of minutes.
-
-							let looped = false;
-
-							while (!runCoords) {
-								if (curY >= 24) { // If the y-index overflows, loop it and shift the x-index over one.
-									curY -= 24;
-									curX += 1;
-								}
-
-								if (curX > 6) {
-									curX -= 7; // If the x-index overflows, loop back to Sunday.
-									looped = true;
-								}
-
-								if (looped && curX === now.getDay()) break; // There are no matches.
-
-								if (rows[curY] && rows[curY][curX] && rows[curY][curX].startsWith("(" + args[0].toUpperCase() + ")")) {
-									runCoords = [curY, curX];
-									break;
-								}
-
-								curY++; // Iterator.
-							}
-
-							if (!runCoords) return;
-
-							const messageID = res.data.values[runCoords[0]][runCoords[1]];
-
-							message
-								.guild
-									.channels
-									.get("572084086726983701")
-										.messages
-										.get(messageID)
-											.delete(1800000);
-						}
-					});
-				});
-			});
-
-			function authorize(credentials, callback) {
-				const {client_secret, client_id, redirect_uris} = credentials.installed;
-				const oAuth2Client = new google.auth.OAuth2(
-					client_id, client_secret, redirect_uris[0]);
-
-				// Check if we have previously stored a token.
-				fs.readFile(TOKEN_PATH, (err, token) => {
-					if (err) return getNewToken(oAuth2Client, callback);
-					oAuth2Client.setCredentials(JSON.parse(token));
-					callback(oAuth2Client);
-				});
-			}
-
-			function getNewToken(oAuth2Client, callback) {
-				const authUrl = oAuth2Client.generateAuthUrl({
-					access_type: 'offline',
-					scope: SCOPES,
-				});
-				console.log(`Authorize this app by visiting this url: ${authUrl}`);
-				const rl = readline.createInterface({
-					input: process.stdin,
-					output: process.stdout,
-				});
-				rl.question('Enter the code from that page here: ', (code) => {
-					rl.close();
-					oAuth2Client.getToken(code, (err, token) => {
-						if (err) return logger.log('error', `Error while trying to retrieve access token ${err}`);
-						oAuth2Client.setCredentials(token);
-						// Store the token to disk for later program executions
-						fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-							if (err) return console.error(err);
-							console.log('Token stored to', TOKEN_PATH);
-						});
-						callback(oAuth2Client);
-					});
-				});
-			}
-		}
-
 		function next(fileName) {
 			fs.readFile(`./schedules/${fileName}`, (err, data) => {
 				if (err) logger.log('error', err) // If it doesn't exist then we don't do anything else.
@@ -354,9 +252,62 @@ module.exports = {
 
 						logger.log('info', `File ${fileName} has been removed, ${message.author.tag} has unscheduled their run.`);
 						message.reply(`your run has been unscheduled.`);
-						schedulePublishChannel.send(`<@${message.author.id}> has unscheduled their run.`);
+						schedulePublishChannel.send(`<@${message.author.id}> has unscheduled their run.`).then((m) => m.delete(10000));
 
-						deleteScheduleEmbed();
+						logger.info("Deleting embed...");
+						sheets.spreadsheets.values.get({
+							spreadsheetId: spreadsheet_id,
+							range: `Backerest Side!B8:H31`,
+						}, (err, res) => {
+							if (err) return logger.log("error", 'The API returned an error: ' + err);
+
+							const rows = res.data.values;
+
+							const now = new Date();
+
+							if (rows.length) {
+								let runCoords; // [row, col]
+
+								let curX = now.getDay();
+								let curY = now.getHours() + 1; // Add 1 to round up regardless of minutes.
+
+								let looped = false;
+
+								while (!runCoords) {
+									if (curY >= 24) { // If the y-index overflows, loop it and shift the x-index over one.
+										curY -= 24;
+										curX += 1;
+									}
+
+									if (curX > 6) {
+										curX -= 7; // If the x-index overflows, loop back to Sunday.
+										looped = true;
+									}
+
+									if (looped && curX === now.getDay()) break; // There are no matches.
+
+									if (rows[curY] && rows[curY][curX] && parseInt(rows[curY][curX])) {
+										runCoords = [curY, curX];
+										break;
+									}
+
+									curY++; // Iterator.
+								}
+
+								if (!runCoords) return logger.info("No embed ID.");
+
+								const messageID = res.data.values[runCoords[0]][runCoords[1]];
+								logger.info(messageID);
+
+								let embedChannel = message.guild.channels.get("572084086726983701");
+								if (!embedChannel) {
+									embedChannel = message.guild.channels.find((ch) => ch.name === "schedules");
+								}
+								embedChannel
+									.fetchMessage(messageID)
+										.then((m) => m.delete());
+							}
+						});
 					});
 				}
 			});

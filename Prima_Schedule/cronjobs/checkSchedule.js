@@ -30,6 +30,8 @@ module.exports = {
 
 						const rows = res.data.values;
 
+						const now = new Date();
+
 						if (rows.length) {
 							let runCoords; // [row, col]
 
@@ -51,7 +53,7 @@ module.exports = {
 
 								if (looped && curX === now.getDay()) break; // There are no matches.
 
-								if (rows[curY] && rows[curY][curX] && rows[curY][curX].startsWith("(" + args[0].toUpperCase() + ")")) {
+								if (rows[curY] && rows[curY][curX] && parseInt(rows[curY][curX])) {
 									runCoords = [curY, curX];
 									break;
 								}
@@ -59,18 +61,19 @@ module.exports = {
 								curY++; // Iterator.
 							}
 
-							if (!runCoords) return;
+							if (!runCoords) return logger.info("No embed ID.");
 
 							const messageID = res.data.values[runCoords[0]][runCoords[1]];
+							logger.info(messageID);
 
-							client
-								.guilds
-								.get("550702475112480769")
-									.channels
-									.get("572084086726983701")
-										.messages
-										.get(messageID)
-											.delete(1800000);
+							const guild = client.guilds.get("550702475112480769");
+							let embedChannel = guild.channels.get("572084086726983701");
+							if (!embedChannel) {
+								embedChannel = guild.channels.find((ch) => ch.name === "schedules");
+							}
+							embedChannel
+								.fetchMessage(messageID)
+									.then((m) => m.delete(1800000));
 						}
 					});
 				});
