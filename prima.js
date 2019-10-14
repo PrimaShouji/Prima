@@ -1,42 +1,44 @@
 // Dependencies
-const Discord              = require("discord.js");
-const fs                   = require("fs");
+const MongoClient     = require("mongodb").MongoClient;
+const winston         = require("winston");
+const DailyRotateFile = require("winston-daily-rotate-file")
 
-const Domain               = require("./lib/subsystem/Domain");
-const RSSManager           = require("./lib/subsystem/RSSManager");
+const Domain          = require("./lib/subsystem/Domain");
 
-const ensureConfig         = require("./lib/util/ensureConfig");
+// Resource setup
+const db = MongoClient.connect("mongodb://localhost:27017/", { useNewUrlParser: true, useUnifiedTopology: true });
+const logger = winston.createLogger({
+	transports: [
+		new winston.transports.Console(),
+        new DailyRotateFile({
+            datePattern: "YYYY-MM-DD-HH",
+            filename: "logs/%DATE%.log",
+            maxSize: "20m"
+        }),
+        new winston.transports.File({
+            filename: "logs/error.log",
+            level: "error"
+        })
+	],
+	format: winston.format.combine(
+		winston.format.timestamp({
+		  format: 'HH:mm:ss'
+		}),
+		winston.format.printf((log) => `[${log.timestamp}][${log.level.toUpperCase()}] - ${log.message}`),
+	),
+});
 
-// Config load/creation
-const { token } = ensureConfig("./config.json");
+// Domain setup
+const domainOptions = {
+    db,
+    logger
+};
 
-// Bot client initialization
-const client = new Discord.Client();
-
-// Client events
-client.eventFiles = fs.readdirSync("./lib/events").filter((fileName) => fileName.endsWith(".js"));
-client.boundEvents = [];
-for (let i = 0; i < client.eventFiles.length; i++) {
-    const e = require("./lib/events/" + client.eventFiles[i]);
-    const boundEvent = client.on(
-        client.eventFiles[i].substr(0, client.eventFiles[i].indexOf(".")),
-        e.bind(null, client)
-    );
-    client.boundEvents[i] = boundEvent;
-}
-
-// Log in and set up subsystems
-client.login(token)
-.then(() => {
-    client.guild = client.guilds.first();
-
-    client.rssManager = new RSSManager(client, "./rss");
-
-    // Domain setup
-    const domains = ["clerical"];//, "extra", "queue", "scheduler", "restart", "admin"];
-    client.domains = {};
-    for (const domain of domains) {
-        client.domains[domain] = new Domain(domain);
-    }
-})
-.catch(console.error);
+const domains = {
+    clerical:  new Domain("clerical", domainOptions),
+    admin:     new Domain("admin", domainOptions),
+    scheduler: new Domain("scheduler", domainOptions),
+    queue:     new Domain("queue", domainOptions),
+    extra:     new Domain("extra", domainOptions),
+    restart:   new Domain("restart", domainOptions)
+};

@@ -15,5 +15,12 @@
   "bugs": {
     "url": "https://github.com/karashiiro/Prima/issues"
   },
-  "homepage": "https://github.com/karashiiro/Prima#readme"
+  "homepage": "https://github.com/karashiiro/Prima#readme",
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "discord.js": "^11.5.1",
+    "mongodb": "^3.3.2",
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^4.2.1"
+  }
 }
