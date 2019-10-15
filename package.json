@@ -19,6 +19,7 @@
   "dependencies": {
     "chalk": "^2.4.2",
     "discord.js": "^11.5.1",
+    "googleapis": "^39.2.0",
     "mongodb": "^3.3.2",
     "winston": "^3.2.1",
     "winston-daily-rotate-file": "^4.2.1"
