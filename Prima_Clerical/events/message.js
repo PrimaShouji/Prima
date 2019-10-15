@@ -78,7 +78,7 @@ module.exports = async (client, logger, message) => {
 	var dbo = (await client.db).db("prima_db");
 
 	dbo.collection("xivcharacters").findOne({ id: message.author.id }, async (err, res) => {
-		if (!res || !message.member.nickname) return;
+		if (!res || !message.guild || !message.member.nickname) return;
 
 		if (!res.name || !res.world) {
 			await dbo.collection("xivcharacters").insertOne({ id: message.author.id });
