@@ -84,7 +84,7 @@ module.exports = async (client, logger, message) => {
 			await dbo.collection("xivcharacters").insertOne({ id: message.author.id });
 			res.name = message.member.nickname.substr(message.member.nickname.indexOf(")") + 1);
 			res.world = message.member.nickname.substr(1, message.member.nickname.indexOf(")"));
-		} else if (message.author.id === "206937283448799233" && res.name && message.member.nickname.indexOf(res.name) === -1) {
+		} else if (res.name && message.member.nickname.indexOf(res.name) === -1) {
 			// I really don't want to deal with this, the bot can do it perfectly fine
 			let world = message.member.nickname.substr(1, message.member.nickname.indexOf(")") - 1);
 			await message.member.setNickname(`(${world}) ${res.name}`).catch((e) => {
