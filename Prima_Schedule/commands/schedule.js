@@ -157,19 +157,15 @@ module.exports = {
 			// Formatted date
 			const dayOfWeekOfRun = daysOfWeek.indexOf(day);
 			if (dayOfWeekOfRun > dayOfRun[1]) {
-				const diff = dayOfWeekOfRun - dayOfRun[1] + 1;
+				const diff = dayOfWeekOfRun - dayOfRun[1];
 				dayOfRun[2] += diff;
-				if (dayOfRun[2] > daysPerMonth[months.indexOf(dayOfRun[0])]) {
-					dayOfRun[2] -= daysPerMonth[months.indexOf(dayOfRun[0])];
-					dayOfRun[0]++;
-				}
 			} else if (dayOfWeekOfRun < dayOfRun[1]) {
-				const diff = dayOfRun[1] - dayOfWeekOfRun + 1;
+				const diff = 6 - dayOfWeekOfRun; // 0-6 days of week
 				dayOfRun[2] += diff;
-				if (dayOfRun[2] > daysPerMonth[months.indexOf(dayOfRun[0])]) {
-					dayOfRun[2] -= daysPerMonth[months.indexOf(dayOfRun[0])];
-					dayOfRun[0]++;
-				}
+			}
+			if (dayOfRun[2] > daysPerMonth[months.indexOf(dayOfRun[0])]) {
+				dayOfRun[2] -= daysPerMonth[months.indexOf(dayOfRun[0])];
+				dayOfRun[0]++;
 			}
 			if (dayOfRun[0] > 11) {
 				dayOfRun[0] -= 12;
