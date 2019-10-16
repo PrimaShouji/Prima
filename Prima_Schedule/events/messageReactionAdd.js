@@ -82,7 +82,7 @@ module.exports = async (client, logger, reaction, user) => {
 		dateRef.set("Sep", { id: 8, name: "September", days: 30 });
 		dateRef.set("Oct", { id: 9, name: "October", days: 31 });
 		dateRef.set("Nov", { id: 10, name: "November", days: 30 });
-		dateRef.set("Dec", { id: 11, name: "Descember", days: 31 });
+		dateRef.set("Dec", { id: 11, name: "December", days: 31 });
 
 		var nextTime = new Date();
 		var nextDayOfTheMonth = now.getDate();
