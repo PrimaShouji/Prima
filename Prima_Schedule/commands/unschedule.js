@@ -299,7 +299,7 @@ module.exports = {
 								const messageID = res.data.values[runCoords[0]][runCoords[1]];
 								logger.info(messageID);
 
-								let embedChannel = message.guild.channels.get("572084086726983701");
+								let embedChannel = message.guild.channels.get("633899725833371658");
 								if (!embedChannel) {
 									embedChannel = message.guild.channels.find((ch) => ch.name === "schedules");
 								}

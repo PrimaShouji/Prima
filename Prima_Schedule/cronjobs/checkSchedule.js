@@ -67,7 +67,7 @@ module.exports = {
 							logger.info(messageID);
 
 							const guild = client.guilds.get("550702475112480769");
-							let embedChannel = guild.channels.get("572084086726983701");
+							let embedChannel = guild.channels.get("633899725833371658");
 							if (!embedChannel) {
 								embedChannel = guild.channels.find((ch) => ch.name === "schedules");
 							}
