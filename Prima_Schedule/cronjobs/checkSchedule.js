@@ -73,7 +73,11 @@ module.exports = {
 							}
 							embedChannel
 								.fetchMessage(messageID)
-									.then((m) => m.delete(1800000));
+									.then(async (m) => {
+										logger.info(`Message ${messageID} scheduled for deletion.`);
+										await m.delete(1800000);
+										logger.info(`Message ${messageID} deleted.`);
+									});
 						}
 					});
 				});
