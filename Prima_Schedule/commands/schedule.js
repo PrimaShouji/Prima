@@ -160,11 +160,11 @@ module.exports = {
 				const diff = dayOfWeekOfRun - dayOfRun[1];
 				dayOfRun[2] += diff;
 			} else if (dayOfWeekOfRun < dayOfRun[1]) {
-				const diff = 6 - dayOfWeekOfRun; // 0-6 days of week
+				const diff = 7 - dayOfRun[1]; // 0-6 days of week
 				dayOfRun[2] += diff;
 			}
-			if (dayOfRun[2] > daysPerMonth[months.indexOf(dayOfRun[0])]) {
-				dayOfRun[2] -= daysPerMonth[months.indexOf(dayOfRun[0])];
+			if (dayOfRun[2] > daysPerMonth[dayOfRun[0]]) {
+				dayOfRun[2] -= daysPerMonth[dayOfRun[0]];
 				dayOfRun[0]++;
 			}
 			if (dayOfRun[0] > 11) {
