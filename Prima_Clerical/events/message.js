@@ -5,7 +5,9 @@ const lockfile = require('lockfile');
 const request = require('request-promise');
 const XIVAPI = require('xivapi-js');
 
-const { prefix, mod_roles, api_key } = require('../config.json');
+const xiv = new XIVAPI({ language: 'en' });
+
+const { prefix, mod_roles } = require('../config.json');
 
 module.exports = async (client, logger, message) => {
 	// Saving the message with a callback because I don't want to block the command loop with this
@@ -74,7 +76,6 @@ module.exports = async (client, logger, message) => {
 	if (message.author.id === client.user.id) return; // Self-commands disabled.
 
 	// Add data to database
-	const xiv = new XIVAPI({private_key: `${api_key}`, language: 'en'});
 	var dbo = (await client.db).db("prima_db");
 
 	dbo.collection("xivcharacters").findOne({ id: message.author.id }, async (err, res) => {
