@@ -118,7 +118,7 @@ module.exports = async (client, logger, message) => {
 				logger.log('info', `prima_db: Updated ${message.author.id}: ${character.ID}, ${character.Avatar}`);
 
 			}).catch((error) => {
-				return logger.log('error', `${res.world} isn't a valid server.`);
+				return logger.log('error', error);
 			});
 		}
 	});
