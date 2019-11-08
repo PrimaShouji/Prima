@@ -89,7 +89,7 @@ module.exports = async (client, logger, reaction, user) => {
 		logger.log('info', days.indexOf(day));
 		logger.log('info', now.getDay());
 		if (days.indexOf(day) < now.getDay()) { // Next run is to the left.
-			nextDayOfTheMonth += (7 - now.getDay()) + runCoords[1];
+			nextDayOfTheMonth += (7 - now.getDay()) + days.indexOf(day);
 		} else if (days.indexOf(day) > now.getDay()) { // Next run is to the right.
 			nextDayOfTheMonth += days.indexOf(day) - now.getDay();
 		}

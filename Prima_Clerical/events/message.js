@@ -108,6 +108,19 @@ module.exports = async (client, logger, message) => {
 				return logger.log('error', `${res.world} isn't a valid server.`);
 			});
 		}
+
+		if (res.lodestone && res.world) {
+			xiv.character.search(res.lodestone, { server: res.world }).then(async (search) => {
+				const character = search.Results[0] // First result is probably the best result.
+
+				await dbo.collection("xivcharacters").updateOne({ id: message.author.id }, { $set: { world: character.Server, name: character.Name, lodestone: character.ID, avatar: character.Avatar } });
+
+				logger.log('info', `prima_db: Updated ${message.author.id}: ${character.ID}, ${character.Avatar}`);
+
+			}).catch((error) => {
+				return logger.log('error', `${res.world} isn't a valid server.`);
+			});
+		}
 	});
 
 	if (message.guild) {
