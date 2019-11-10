@@ -327,7 +327,7 @@ module.exports = {
 
 					const embeddable = new Discord.RichEmbed()
 						.setColor(color)
-						.setTitle(`${leaderReadable} has just scheduled a run on ${day} at ${time} (PDT) [${dayOfRun[1]}, ${dayOfRun[0]} ${dayOfRun[2]}]!`)
+						.setTitle(`${leaderReadable} has just scheduled a run on ${day} at ${time} (PST) [${dayOfRun[1]}, ${dayOfRun[0]} ${dayOfRun[2]}]!`)
 						.setDescription(commontags.stripIndents`
 							React to the :vibration_mode: on their message to be notified 30 minutes before it begins!
 
