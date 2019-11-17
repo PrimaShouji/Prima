@@ -311,7 +311,7 @@ module.exports = {
 
 					logger.log('info', `Run scheduled as "${description}" on ${day} at ${time}`)
 					message.channel.send(commontags.stripIndents`
-						${leaderMention} has just scheduled a run on ${day} at ${time} (PDT)!
+						${leaderMention} has just scheduled a run on ${day} at ${time} (PST)!
 						React to the :vibration_mode: on their message to be notified 30 minutes before it begins!
 					`)
 						.then(() => {
