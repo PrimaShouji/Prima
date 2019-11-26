@@ -141,7 +141,7 @@ module.exports = {
 			meridiem = data[1].substr(data[1].indexOf(' ') + 1);
 			logger.log('info', `${day},${hour}:${minute < 10 ? "0" + minute : minute} ${meridiem}`);
 
-			if (hour !== 12 && meridiem == 'PM') {
+			if (hour !== 12 && meridiem.startsWith('PM')) {
 				hour += 12;
 			}
 
