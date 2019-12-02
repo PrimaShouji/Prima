@@ -37,21 +37,19 @@ const logger = winston.createLogger({
     ),
 });
 
+client.domain = "scheduler";
+
 // Client events
-client.eventFiles = fs.readdirSync("./events").filter((fileName) => fileName.endsWith(".js"));
-client.eventFiles.concat(fs.readdirSync("../events")
-    .filter((fileName) => fileName.endsWith(".js"))
-    .map((fileName) => "../events/" + fileName)
-);
+client.eventFiles = fs.readdirSync("./lib/events/").filter((fileName) => fileName.endsWith(".js"));
 client.boundEvents = [];
 for (let i = 0; i < client.eventFiles.length; i++) {
-    const e = require("./events/" + client.eventFiles[i]);
-    if (e.domain !== domain) continue;
+    const e = require("./lib/events/" + client.eventFiles[i]);
+    if (e.domain && e.domain !== client.domain) continue;
     const eventName = client.eventFiles[i].substr(0, client.eventFiles[i].indexOf("."));
     client.removeAllListeners(eventName);
     const boundEvent = client.on(
         eventName,
-        e.bind(null, client);
+        e.bind(null, client, logger);
     );
     client.boundEvents.push(boundEvent);
 }
@@ -59,4 +57,4 @@ for (let i = 0; i < client.eventFiles.length; i++) {
 client.login(token)
 .then(() => {
     client.sheets = new GoogleSheets();
-})
+});
