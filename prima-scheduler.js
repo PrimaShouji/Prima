@@ -49,7 +49,7 @@ for (let i = 0; i < client.eventFiles.length; i++) {
     client.removeAllListeners(eventName);
     const boundEvent = client.on(
         eventName,
-        e.bind(null, client, logger);
+        e.bind(null, client, logger)
     );
     client.boundEvents.push(boundEvent);
 }
