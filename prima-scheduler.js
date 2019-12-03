@@ -40,18 +40,20 @@ const logger = winston.createLogger({
 client.domain = "scheduler";
 
 // Client events
-client.eventFiles = fs.readdirSync("./lib/events/").filter((fileName) => fileName.endsWith(".js"));
-client.boundEvents = [];
-for (let i = 0; i < client.eventFiles.length; i++) {
-    const e = require("./lib/events/" + client.eventFiles[i]);
+const eventFiles = fs.readdirSync("./lib/events/").filter((fileName) => fileName.endsWith(".js"));
+for (let i = 0; i < eventFiles.length; i++) {
+    const e = require("./lib/events/" + eventFiles[i]);
+    const eventName = eventFiles[i].substr(0, eventFiles[i].indexOf("."));
     if (e.domain && e.domain !== client.domain) continue;
-    const eventName = client.eventFiles[i].substr(0, client.eventFiles[i].indexOf("."));
-    client.removeAllListeners(eventName);
-    const boundEvent = client.on(
+
+    if (client.listeners(eventName)) {
+        if (e.domain) client.removeAllListeners(eventName);
+    }
+
+    client.on(
         eventName,
         e.bind(null, client, logger)
     );
-    client.boundEvents.push(boundEvent);
 }
 
 client.login(token)
