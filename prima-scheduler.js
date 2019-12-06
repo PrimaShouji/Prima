@@ -3,6 +3,7 @@ const Discord         = require("discord.js");
 
 const createLogger    = require("./lib/util/createLogger");
 const ensureConfig    = require("./lib/util/ensureConfig");
+const loadCronJobs    = require("./lib/util/loadCronJobs");
 const loadEvents      = require("./lib/util/loadEvents");
 
 const GoogleSheets    = require("./lib/subsystem/GoogleSheets");
@@ -18,7 +19,8 @@ client.domain = "scheduler";
 client.logger = createLogger();
 
 // Client events
-loadEvents(client, client.logger);
+loadCronJobs(client);
+loadEvents(client);
 
 // Login
 client.login(token)
