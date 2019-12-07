@@ -1,6 +1,5 @@
 // Dependencies
 const Discord         = require("discord.js");
-const { MongoClient } = require("mongodb");
 
 const createLogger    = require("./lib/util/createLogger");
 const ensureConfig    = require("./lib/util/ensureConfig");
