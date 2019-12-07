@@ -2,7 +2,7 @@
   "name": "prima",
   "version": "2.0.0",
   "description": "karashiiro/Prima-P's everything bot uwu",
-  "main": "prima-scheduler.js",
+  "main": "prima-moderation.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
