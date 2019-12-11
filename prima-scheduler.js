@@ -19,11 +19,11 @@ client.domain = "scheduler";
 client.logger = createLogger();
 
 // Client events
-loadCronJobs(client);
 loadEvents(client);
 
 // Login
 client.login(token)
 .then(() => {
     client.sheets = new GoogleSheets();
+    loadCronJobs(client);
 });
