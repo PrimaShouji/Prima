@@ -13,7 +13,7 @@ module.exports = {
 		if (!args[1]) return message.reply(`this command takes the parameters \`<day>\` and \`<time>\`!`);
 
 		const dir = fs.readdirSync(`./schedules`); // It's not like this is an intensive operation, I'll just leave it like this instead of async.
-		if (dir.length < 1) return message.reply(`no runs seem to be scheduled right now.`);
+		if (dir.length < 1) return;// message.reply(`no runs seem to be scheduled right now.`);
 
 		args = args.filter((a) => a !== "");
 
@@ -72,7 +72,7 @@ module.exports = {
 			}
 		}
 
-		if (!foundAny) return message.reply(`you don't seem to have a run scheduled at that day and time!`);
+		if (!foundAny) return;// message.reply(`you don't seem to have a run scheduled at that day and time!`);
 
 		function next(fileName) {
 			fs.readFile(`./schedules/${fileName}`, (err, data) => {
