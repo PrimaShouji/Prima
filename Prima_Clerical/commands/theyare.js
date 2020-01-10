@@ -40,39 +40,6 @@ module.exports = {
 		xiv.character.search(name, { server: world }).then(async (res, err) => {
 			const character = res.Results.find((result) => result.Name.toLowerCase() === name.toLowerCase());
 
-			let ans = JSON.parse(await request(`https://xivapi.com/character/${character.ID}`));
-
-			let meetsLevel = false;
-
-			if (!ans.Character) {
-				message.channel.startTyping();
-				for (var i = 0; i < 10; i++) {
-					ans = JSON.parse(await request(`https://xivapi.com/character/${character.ID}`));
-					if (ans.Character) break;
-					await delay(1000);
-				}
-				message.channel.stopTyping();
-			}
-
-			try {
-				for (job in ans.Character.ClassJobs) {
-					let jobID = parseInt(ans.Character.ClassJobs[job].JobID);
-					if (jobID < 8 || jobID > 18) {
-						if (parseInt(ans.Character.ClassJobs[job].Level) >= MIN_LEVEL) {
-							meetsLevel = true;
-						}
-					}
-				}
-			} catch(err) {
-				return message.reply(`I couldn't access your character data. This may mean your data was just fetched, please try again.`).then(m => m.delete(10000));
-			}
-
-			if (!meetsLevel) {
-				return message.channel.send(`This is a security notice. <@${userID}>, that character does not have any combat jobs at Level ${MIN_LEVEL}.`).then(m => m.delete(10000));
-			}
-
-			// End security
-
 			world = world.toLowerCase();
 			world = world.charAt(0).toUpperCase() + world.substr(1);
 			name = character.Name; // ("")
@@ -110,8 +77,11 @@ module.exports = {
 
 					message.channel.send(output).then((msg) => msg.delete(10000));
 
-					(await message.guild.fetchMember(userID)).setNickname(`(${world}) ${name}`).then((mem) => { // Update their nickname.
-						logger.log('info', `Changed <@${userID}>'s nickname to (${world}) ${name}.`);
+					let nickname = `(${world}) ${name}`;
+					if (nickname.length > 32) nickname = name;
+
+					(await message.guild.fetchMember(userID)).setNickname(nickname).then((mem) => { // Update their nickname.
+						logger.log('info', `Changed <@${userID}>'s nickname to ${nickname}.`);
 					}).catch((err) => {
 						logger.log('error', `${err}. Are they the server owner?`);
 					});

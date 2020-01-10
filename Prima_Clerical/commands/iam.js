@@ -104,8 +104,11 @@ module.exports = {
 
 					message.channel.send(output).then((msg) => msg.delete(10000));
 
-					message.member.setNickname(`(${world}) ${name}`).then((mem) => { // Update their nickname.
-						logger.log('info', `Changed ${message.author.tag}'s nickname to (${world}) ${name}.`);
+					let nickname = `(${world}) ${name}`;
+					if (nickname.length > 32) nickname = name;
+
+					message.member.setNickname(nickname).then((mem) => { // Update their nickname.
+						logger.log('info', `Changed ${message.member}'s' nickname to ${nickname}.`);
 					}).catch((err) => {
 						logger.log('error', `${err}. Are they the server owner?`);
 					});
