@@ -26,6 +26,5 @@ client.login(token)
 .then(() => {
     client.calendar = new Google();
     client.sheets = new Google();
-    client.calendar.getCalendarAPI();
     loadCronJobs(client);
 });
