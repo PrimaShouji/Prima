@@ -1,15 +1,15 @@
 // Dependencies
-const Discord         = require("discord.js");
+const Discord      = require("discord.js");
 
-const createLogger    = require("./lib/util/createLogger");
-const ensureConfig    = require("./lib/util/ensureConfig");
-const loadCronJobs    = require("./lib/util/loadCronJobs");
-const loadEvents      = require("./lib/util/loadEvents");
+const createLogger = require("./lib/util/createLogger");
+const ensureConfig = require("./lib/util/ensureConfig");
+const loadCronJobs = require("./lib/util/loadCronJobs");
+const loadEvents   = require("./lib/util/loadEvents");
 
-const Google  = require("./lib/subsystem/Google");
+const Google       = require("./lib/subsystem/Google");
 
 // Config load/creation
-const { token } = ensureConfig("./config.json");
+const { token }    = ensureConfig("./config.json");
 
 // Bot client initialization
 const client = new Discord.Client();

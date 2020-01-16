@@ -6,6 +6,8 @@ const ensureConfig    = require("./lib/util/ensureConfig");
 const loadCronJobs    = require("./lib/util/loadCronJobs");
 const loadEvents      = require("./lib/util/loadEvents");
 
+const MongoDBClient   = require("./lib/subsystem/MongoDBClient");
+
 // Config load/creation
 const { token } = ensureConfig("./config.json");
 
@@ -21,4 +23,7 @@ loadCronJobs(client);
 loadEvents(client);
 
 // Login
-client.login(token);
+client.login(token)
+.then(() => {
+    client.dbManager = new MongoDBClient(client);
+});
