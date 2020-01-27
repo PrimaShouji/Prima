@@ -28,7 +28,7 @@ module.exports = {
 
 		// Sanitation for the initial query.
 		var world = args[0].replace(/[^a-zA-Z]/g, "").replace(/(?:courel|couerl)/g, "Coeurl");
-		var name = (args[1] + " " + args[2]).replace(/[<>]/g, "").replace(/’/gu, "'"));
+		var name = (args[1] + " " + args[2]).replace(/[<>]/g, "").replace(/’/gu, "'");
 
 		xiv.character.search(name, { server: world }).then(async (res, err) => {
 			const character = res.Results.find((result) => result.Name.toLowerCase() === name.toLowerCase());
