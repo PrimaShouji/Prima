@@ -7,7 +7,7 @@ const xiv = new XIVAPI({language: 'en'});
 
 module.exports = {
 	name: 'iam',
-	aliases: ["I"],
+	aliases: ["i"],
 	cooldown: 0.05,
 	description: `Links a character to your Discord account.`,
 	args: true,
@@ -20,6 +20,7 @@ module.exports = {
 			});
 		}
 
+		console.log(args.length === 4 && args[0].toLowerCase() === "am");
 		if (args.length === 4 && args[0].toLowerCase() === "am") {
 			args.shift();
 		}
