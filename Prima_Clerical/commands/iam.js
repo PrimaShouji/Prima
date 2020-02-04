@@ -20,7 +20,7 @@ module.exports = {
 			});
 		}
 
-		if (message.content.slice(1).startsWith("i am")) {
+		if (args.length === 4 && args[0].toLowerCase() === "am") {
 			args.shift();
 		}
 
