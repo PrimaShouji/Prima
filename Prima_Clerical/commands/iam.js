@@ -7,6 +7,7 @@ const xiv = new XIVAPI({language: 'en'});
 
 module.exports = {
 	name: 'iam',
+	aliases: ["I"],
 	cooldown: 0.05,
 	description: `Links a character to your Discord account.`,
 	args: true,
@@ -17,6 +18,10 @@ module.exports = {
 					resolve(val);
 				}, t);
 			});
+		}
+
+		if (message.content.slice(1).startsWith("i am")) {
+			args.shift();
 		}
 
 		message.guild.fetchMember(message.author.id).catch((e) => {}); // An attempt to make it work more often.

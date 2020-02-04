@@ -187,7 +187,7 @@ module.exports = async (client, logger, message) => {
 	}
 
 	// Command handler
-	if (!message.content.startsWith(prefix)) return; // Don't execute code past this point if the message is not a command
+	if (!message.content.startsWith(prefix) || !message.content.startsWith("-")) return; // Don't execute code past this point if the message is not a command
 
 	const args = message.content.slice(prefix.length).split(/\s/g); // Cut off the prefix, separate command into words
 	const commandName = args.shift().toLowerCase(); // cAmEl CaSe Is GoOd CiViLiZaTiOn
@@ -195,7 +195,7 @@ module.exports = async (client, logger, message) => {
 	const command = client.commands.get(commandName)
 		|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
-	if (!command) return; // If the command isn't a known command or command alias then return
+	if (!command || command && command.name === "iam" && message.content.startsWith("-")) return; // If the command isn't a known command or command alias then return
 
 	logger.log('info', `${message.author.tag}: ${message}`);
 
